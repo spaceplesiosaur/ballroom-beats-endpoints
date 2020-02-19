@@ -66,6 +66,16 @@ type (
 		Tempo         float64 `json:"tempo"`
 		TimeSignature int64    `json: "timesignature"`
 	}
+	songInput struct {
+		Title         string  `json:"title"`
+		SpotifyId     string  `json:"spotifyid"`
+		URL           string  `json:"url"`
+		Delay         float64 `json:"delay"`
+		AvBarDuration float64 `json:"avbarduration"`
+		Duration      float64 `json:"duration"`
+		Tempo         float64 `json:"tempo"`
+		TimeSignature int64    `json: "timesignature"`
+	}
 
 	transformedSong struct {
 		ID            uint    `json:"id"`
@@ -82,42 +92,18 @@ type (
 
 func addSong(context *gin.Context) {
 
-  // delay, err := strconv.ParseFloat(context.JSON("delay"), 64)
-  // if err != nil {
-  //   context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "delay should be a float!", "Err": err, "DataType": reflect.TypeOf(delay), "Delay": context.PostForm("delay")})
-	// 	return
-	// }
-  // avbarduration, err := strconv.ParseFloat(context.JSON("avbarduration"), 64)
-  // if err != nil {
-  //   context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "avbarduration should be a float!"})
-	// 	return
-	// }
-  // duration, err := strconv.ParseFloat(context.JSON("duration"), 64)
-  // if err != nil {
-  //   context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "duration should be a float!"})
-	// 	return
-	// }
-  // tempo, err := strconv.ParseFloat(context.JSON("tempo"), 64)
-  // if err != nil {
-  //   context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "tempo should be a float!"})
-	// 	return
-	// }
-  // timesignature, err := strconv.ParseUint(context.Param("timesignature"), 10, 32)
-  // if err != nil {
-  //   context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "timesignature should be an integer!"})
-	// 	return
-	// }
-
+  var body songInput
+  context.BindJSON(&body)
 
 	song := songModel{
-    Title: context.GetString("title"),
-    SpotifyId: context.GetString("spotifyid"),
-    URL: context.GetString("url"),
-    Delay: context.GetFloat64("delay"),
-    AvBarDuration: context.GetFloat64("avbarduration"),
-    Duration: context.GetFloat64("duration"),
-    Tempo: context.GetFloat64("tempo"),
-    TimeSignature: context.GetInt64("timesignature"),
+    Title: body.Title,
+    SpotifyId: body.SpotifyId,
+    URL: body.URL,
+    Delay: body.Delay,
+    AvBarDuration: body.AvBarDuration,
+    Duration: body.Duration,
+    Tempo: body.Tempo,
+    TimeSignature: body.TimeSignature,
   }
 
 	db.Save(&song)
