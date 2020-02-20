@@ -49,56 +49,57 @@ func main() {
 }
 
 type (
-	songModel struct {
+	// Consider renaming table as 'songs'
+	songTable struct {
 		gorm.Model
-		Title         string  `json:"title"`
-		SpotifyId     string  `json:"spotifyid"`
-		URL           string  `json:"url"`
-		Delay         float64 `json:"delay"`
-		AvBarDuration float64 `json:"avbarduration"`
-		Duration      float64 `json:"duration"`
-		Tempo         float64 `json:"tempo"`
-		TimeSignature int64    `json: "timesignature"`
+		Title          string  `json:"title"`
+		SpotifyId      string  `json:"spotify_id"`
+		URL            string  `json:"url"`
+		Delay          float64 `json:"delay"`
+		AvgBarDuration float64 `json:"avg_bar_duration"`
+		Duration       float64 `json:"duration"`
+		Tempo          float64 `json:"tempo"`
+		TimeSignature  int64   `json:"time_signature"`
 	}
 	songInput struct {
-		Title         string  `json:"title"`
-		SpotifyId     string  `json:"spotifyid"`
-		URL           string  `json:"url"`
-		Delay         float64 `json:"delay"`
-		AvBarDuration float64 `json:"avbarduration"`
-		Duration      float64 `json:"duration"`
-		Tempo         float64 `json:"tempo"`
-		TimeSignature int64    `json: "timesignature"`
+		Title          string  `json:"title"`
+		SpotifyId      string  `json:"spotify_id"`
+		URL            string  `json:"url"`
+		Delay          float64 `json:"delay"`
+		AvgBarDuration float64 `json:"avg_bar_duration"`
+		Duration       float64 `json:"duration"`
+		Tempo          float64 `json:"tempo"`
+		TimeSignature  int64   `json:"time_signature"`
 	}
 
 	transformedSong struct {
-		ID            uint    `json:"id"`
-		Title         string  `json:"title"`
-		SpotifyId     string  `json:"spotifyid"`
-		URL           string  `json:"url"`
-		Delay         float64 `json:"delay"`
-		AvBarDuration float64 `json:"avbarduration"`
-		Duration      float64 `json:"duration"`
-		Tempo         float64 `json:"tempo"`
-		TimeSignature int64    `json: "timesignature"`
+		ID             uint    `json:"id"`
+		Title          string  `json:"title"`
+		SpotifyId      string  `json:"spotify_id"`
+		URL            string  `json:"url"`
+		Delay          float64 `json:"delay"`
+		AvgBarDuration float64 `json:"avg_bar_duration"`
+		Duration       float64 `json:"duration"`
+		Tempo          float64 `json:"tempo"`
+		TimeSignature  int64   `json:"time_signature"`
 	}
 )
 
 func addSong(context *gin.Context) {
 
-  var body songInput
-  context.BindJSON(&body)
+	var body songInput
+	context.BindJSON(&body)
 
-	song := songModel{
-    Title: body.Title,
-    SpotifyId: body.SpotifyId,
-    URL: body.URL,
-    Delay: body.Delay,
-    AvBarDuration: body.AvBarDuration,
-    Duration: body.Duration,
-    Tempo: body.Tempo,
-    TimeSignature: body.TimeSignature,
-  }
+	song := songTable{
+		Title:          body.Title,
+		SpotifyId:      body.SpotifyId,
+		URL:            body.URL,
+		Delay:          body.Delay,
+		AvgBarDuration: body.AvgBarDuration,
+		Duration:       body.Duration,
+		Tempo:          body.Tempo,
+		TimeSignature:  body.TimeSignature,
+	}
 
 	db.Save(&song)
 
@@ -107,7 +108,7 @@ func addSong(context *gin.Context) {
 
 func fetchAllSongs(context *gin.Context) {
 
-	var songs []songModel
+	var songs []songTable
 
 	db.Find(&songs)
 
@@ -119,9 +120,8 @@ func fetchAllSongs(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": songs})
 }
 
-
 func fetchSong(context *gin.Context) {
-	var song songModel
+	var song songTable
 	songID := context.Param("id")
 
 	db.First(&song, songID)
@@ -131,7 +131,7 @@ func fetchSong(context *gin.Context) {
 		return
 	}
 
-	_song := transformedSong{ID: song.ID, Title: song.Title, SpotifyId: song.SpotifyId, URL: song.URL, Delay: song.Delay, AvBarDuration: song.AvBarDuration, Duration: song.Duration, Tempo: song.Tempo, TimeSignature: song.TimeSignature}
+	_song := transformedSong{ID: song.ID, Title: song.Title, SpotifyId: song.SpotifyId, URL: song.URL, Delay: song.Delay, AvgBarDuration: song.AvgBarDuration, Duration: song.Duration, Tempo: song.Tempo, TimeSignature: song.TimeSignature}
 
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": _song})
 }
