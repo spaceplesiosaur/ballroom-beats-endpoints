@@ -31,8 +31,8 @@ func init() {
 	}
 
 	fmt.Println("Successfully connected!")
-	// db.DropTable(&songModel{}) // We need to refactor our migrations to account for 'rollbacks' where we drop our tables and rebuild.
-	db.AutoMigrate(&songModel{})
+	// db.DropTable(&songTable{}) // We need to refactor our migrations to account for 'rollbacks' where we drop our tables and rebuild.
+	db.AutoMigrate(&songTable{})
 }
 
 func main() {
