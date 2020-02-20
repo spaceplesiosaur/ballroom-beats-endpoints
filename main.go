@@ -1,31 +1,27 @@
 package main
 
 import (
-	// "database/sql"
 	"fmt"
-	//format - functions related to input and output
 	"net/http"
-	// "strconv"
-  // "reflect"
+	// "strconv" // Was removing automatically so I commented it out
+	// "reflect" // Was removing automatically so I commented it out
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 )
 
 const (
-	host = "localhost"
-	port = 5432
+	host   = "localhost"
+	port   = 5432
 	dbname = "ballroom_beats_development"
 )
 
 var db *gorm.DB
 
 func init() {
-
 	psqlInfo := fmt.Sprintf("host=%s port=%d "+
 		"dbname=%s sslmode=disable",
 		host, port, dbname)
-
 	var err error
 
 	db, err = gorm.Open("postgres", psqlInfo)
@@ -35,21 +31,19 @@ func init() {
 	}
 
 	fmt.Println("Successfully connected!")
-
+	// db.DropTable(&songModel{}) // We need to refactor our migrations to account for 'rollbacks' where we drop our tables and rebuild.
 	db.AutoMigrate(&songModel{})
 }
 
 func main() {
 
 	router := gin.Default()
-
 	songs := router.Group("/api/v1/songs")
+
 	{
 		songs.POST("/", addSong)
 		songs.GET("/", fetchAllSongs)
 		songs.GET("/:id", fetchSong)
-		// v1.PUT("/:id", changeSong)
-		// v1.DELETE("/:id", removeSong)
 	}
 	router.Run()
 }
@@ -141,37 +135,3 @@ func fetchSong(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": _song})
 }
-
-// changeSong update a song
-
-// func changeSong(c *gin.Context) {
-// 	var song songModel
-// 	songID := c.Param("id")
-//
-// 	db.First(&song, songID)
-//
-// 	if song.ID == 0 {
-// 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No song found!"})
-// 		return
-// 	}
-//
-// 	db.Model(&song).Update("title", c.PostForm("title"))
-// 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "Song updated successfully!"})
-// }
-
-// removeSong remove a song
-
-// func removeSong(c *gin.Context) {
-// 	var song songModel
-// 	songID := c.Param("id")
-//
-// 	db.First(&song, songID)
-//
-// 	if song.ID == 0 {
-// 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No song found!"})
-// 		return
-// 	}
-//
-// 	db.Delete(&song)
-// 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "message": "Song deleted successfully!"})
-// }

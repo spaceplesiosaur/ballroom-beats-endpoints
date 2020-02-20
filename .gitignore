@@ -1,0 +1,9 @@
+# Default ignored files
+/workspace.xml
+*.iml
+tmp/*
+.idea
+
+# .credentials
+# .DS_Store
+# run.sh
