@@ -44,6 +44,7 @@ func main() {
 		songs.POST("/", addSong)
 		songs.GET("/", fetchAllSongs)
 		songs.GET("/:id", fetchSong)
+		songs.DELETE("/:id", removeSong)
 	}
 	router.Run()
 }
@@ -134,4 +135,22 @@ func fetchSong(context *gin.Context) {
 	_song := transformedSong{ID: song.ID, Title: song.Title, SpotifyId: song.SpotifyId, URL: song.URL, Delay: song.Delay, AvgBarDuration: song.AvgBarDuration, Duration: song.Duration, Tempo: song.Tempo, TimeSignature: song.TimeSignature}
 
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": _song})
+}
+
+func removeSong(context *gin.Context) {
+	var song songTable
+
+	songID := context.Param("id")
+
+	db.First(&song, songID)
+
+	if song.ID == 0 {
+		context.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No song found!"})
+		return
+	}
+
+	db.Delete(&song)
+
+	context.JSON(http.StatusNoContent, gin.H{"status": http.StatusNoContent, "message": "Successfully deleted!"})
+
 }
