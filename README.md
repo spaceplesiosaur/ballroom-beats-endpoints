@@ -1,6 +1,6 @@
 # ballroom-beats-service
 
-This API was built for the [Ballroom Beats UP](https://github.com/Asilo5/Ballroom-Beats-UI).
+This API was built for the [Ballroom Beats UI](https://github.com/Asilo5/Ballroom-Beats-UI).
 
 ## Created by:
 
