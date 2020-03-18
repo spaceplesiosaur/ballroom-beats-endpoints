@@ -37,14 +37,15 @@ func (a *App) Initialize(dbType string, dbInfo string) {
 }
 
 func main() {
-
-	dbInfo := fmt.Sprintf("host=%s port=%d "+
-		"dbname=%s sslmode=disable",
-		host, port, dbname)
-
+	dbConfig := os.Getenv("DATABASE_URL")  // This name, DATABASE_URL, comes from Heroku
+	if dbConfig == "" {
+	  dbConfig = fmt.Sprintf("host=%s port=%d "+
+			"dbname=%s sslmode=disable",
+			host, port, dbname)
+	}
 	a := &App{}
+	a.Initialize("postgres", dbConfig) // You'll have to modify this to take a port option!
 
-	a.Initialize("postgres", dbInfo)
 	router := a.MakeRouter()
 	router.Run()
 
