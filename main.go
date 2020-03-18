@@ -3,117 +3,147 @@ package main
 import (
 	"fmt"
 	"net/http"
-	// "strconv" // Was removing automatically so I commented it out
-	// "reflect" // Was removing automatically so I commented it out
 	"github.com/gin-gonic/gin"
+//This import gin, is like express, it's a library for handling http requests and responses
 	"github.com/jinzhu/gorm"
+	//gorm is an ORM, and object relationship manager.  It is kind of like knex. This builds your database
 	_ "github.com/lib/pq"
+		//this is our import to use postgres
 )
+
 
 const (
-	host   = "localhost"
-	port   = 5432
-	dbname = "ballroom_beats_development"
+	host = "localhost"
+	port = 5432
+	dbname = "bbpractice"
 )
 
-var db *gorm.DB
+type App struct {
+  DB *gorm.DB
+}
 
-func init() {
-	psqlInfo := fmt.Sprintf("host=%s port=%d "+
-		"dbname=%s sslmode=disable",
-		host, port, dbname)
+func (a *App) Initialize(dbType string, dbInfo string) {
+
 	var err error
 
-	db, err = gorm.Open("postgres", psqlInfo)
+	a.DB, err = gorm.Open(dbType, dbInfo)
 
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("Successfully connected!")
-	// db.DropTable(&songTable{}) // We need to refactor our migrations to account for 'rollbacks' where we drop our tables and rebuild.
-	db.AutoMigrate(&songTable{})
+	a.DB.AutoMigrate(&songModel{})
 }
 
 func main() {
 
-	router := gin.Default()
-	songs := router.Group("/api/v1/songs")
+	dbInfo := fmt.Sprintf("host=%s port=%d "+
+		"dbname=%s sslmode=disable",
+		host, port, dbname)
 
-	{
-		songs.POST("/", addSong)
-		songs.GET("/", fetchAllSongs)
-		songs.GET("/:id", fetchSong)
-		songs.DELETE("/:id", removeSong)
-	}
+	a := &App{}
+
+	a.Initialize("postgres", dbInfo)
+	router := a.MakeRouter()
 	router.Run()
+
 }
 
 type (
-	// Consider renaming table as 'songs'
-	songTable struct {
+
+	songModel struct {
 		gorm.Model
-		Title          string  `json:"title"`
-		SpotifyId      string  `json:"spotify_id"`
-		URL            string  `json:"url"`
-		Delay          float64 `json:"delay"`
-		AvgBarDuration float64 `json:"avg_bar_duration"`
-		Duration       float64 `json:"duration"`
-		Tempo          float64 `json:"tempo"`
-		TimeSignature  int64   `json:"time_signature"`
+		Title         string  `json:"title"`
+		SpotifyId     string  `json:"spotifyid"`
+		URL           string  `json:"url"`
+		Delay         float64 `json:"delay"`
+		AvBarDuration float64 `json:"avbarduration"`
+		Duration      float64 `json:"duration"`
+		Tempo         float64 `json:"tempo"`
+		TimeSignature int64    `json: "timesignature"`
 	}
-	songInput struct {
-		Title          string  `json:"title"`
-		SpotifyId      string  `json:"spotify_id"`
-		URL            string  `json:"url"`
-		Delay          float64 `json:"delay"`
-		AvgBarDuration float64 `json:"avg_bar_duration"`
-		Duration       float64 `json:"duration"`
-		Tempo          float64 `json:"tempo"`
-		TimeSignature  int64   `json:"time_signature"`
+
+  songInput struct {
+		Title         string  `json:"title"`
+		SpotifyId     string  `json:"spotifyid"`
+		URL           string  `json:"url"`
+	  Delay         float64 `json:"delay"`
+		AvBarDuration float64 `json:"avbarduration"`
+		Duration      float64 `json:"duration"`
+		Tempo         float64 `json:"tempo"`
+		TimeSignature int64    `json: "timesignature"`
 	}
 
 	transformedSong struct {
-		ID             uint    `json:"id"`
-		Title          string  `json:"title"`
-		SpotifyId      string  `json:"spotify_id"`
-		URL            string  `json:"url"`
-		Delay          float64 `json:"delay"`
-		AvgBarDuration float64 `json:"avg_bar_duration"`
-		Duration       float64 `json:"duration"`
-		Tempo          float64 `json:"tempo"`
-		TimeSignature  int64   `json:"time_signature"`
+		ID            uint    `json:"id"`
+		Title         string  `json:"title"`
+		SpotifyId     string  `json:"spotifyid"`
+		URL           string  `json:"url"`
+		Delay         float64 `json:"delay"`
+		AvBarDuration float64 `json:"avbarduration"`
+		Duration      float64 `json:"duration"`
+		Tempo         float64 `json:"tempo"`
+		TimeSignature int64    `json: "timesignature"`
 	}
 )
 
-func addSong(context *gin.Context) {
+func (a *App) MakeRouter() *gin.Engine{
+	router := gin.Default()
 
-	var body songInput
-	context.BindJSON(&body)
-
-	song := songTable{
-		Title:          body.Title,
-		SpotifyId:      body.SpotifyId,
-		URL:            body.URL,
-		Delay:          body.Delay,
-		AvgBarDuration: body.AvgBarDuration,
-		Duration:       body.Duration,
-		Tempo:          body.Tempo,
-		TimeSignature:  body.TimeSignature,
+	songs := router.Group("/api/v1/songs")
+	{
+		songs.POST("/", a.AddSong)
+		songs.GET("/", a.FetchAllSongs)
+		songs.GET("/:id", a.FetchSong)
+		songs.DELETE("/:id", a.RemoveSong)
 	}
 
-	db.Save(&song)
+	return router
+}
+
+//AddSong posts a new songs
+
+func (a *App) AddSong(context *gin.Context) {
+  var body songInput
+
+  context.BindJSON(&body)
+
+	if body.Title == "" || body.SpotifyId == "" ||  body.URL == "" {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "Has a missing or malformed string property"})
+		return
+	}
+
+	if body.Delay == 0 || body.AvBarDuration == 0 ||  body.Duration == 0 || body.Tempo == 0 || body.TimeSignature == 0 {
+		context.JSON(http.StatusUnprocessableEntity, gin.H{"status": http.StatusUnprocessableEntity, "message": "Missing or malformed numerical property"})
+		return
+	}
+
+  song := songModel{
+    Title: body.Title,
+    SpotifyId: body.SpotifyId,
+    URL: body.URL,
+    Delay: body.Delay,
+    AvBarDuration: body.AvBarDuration,
+    Duration: body.Duration,
+    Tempo: body.Tempo,
+    TimeSignature: body.TimeSignature,
+  }
+
+	a.DB.Save(&song)
 
 	context.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Song created successfully!", "resourceId": song.ID})
 }
 
-func fetchAllSongs(context *gin.Context) {
+//FetchAllSongs fetches every song in the database
 
-	var songs []songTable
+func (a *App) FetchAllSongs(context *gin.Context) {
 
-	db.Find(&songs)
+	var songs []songModel
 
-	if len(songs) <= 0 {
+	a.DB.Find(&songs)
+
+	if len(songs) == 0 {
 		context.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No songs found!"})
 		return
 	}
@@ -121,35 +151,39 @@ func fetchAllSongs(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": songs})
 }
 
-func fetchSong(context *gin.Context) {
-	var song songTable
+// FetchSong fetches a single song
+
+func (a *App) FetchSong(context *gin.Context) {
+	var song songModel
 	songID := context.Param("id")
 
-	db.First(&song, songID)
+	a.DB.First(&song, songID)
 
 	if song.ID == 0 {
 		context.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No song found!"})
 		return
 	}
 
-	_song := transformedSong{ID: song.ID, Title: song.Title, SpotifyId: song.SpotifyId, URL: song.URL, Delay: song.Delay, AvgBarDuration: song.AvgBarDuration, Duration: song.Duration, Tempo: song.Tempo, TimeSignature: song.TimeSignature}
+	_song := transformedSong{ID: song.ID, Title: song.Title, SpotifyId: song.SpotifyId, URL: song.URL, Delay: song.Delay, AvBarDuration: song.AvBarDuration, Duration: song.Duration, Tempo: song.Tempo, TimeSignature: song.TimeSignature}
 
 	context.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": _song})
 }
 
-func removeSong(context *gin.Context) {
-	var song songTable
+//RemoveSong deletes a song
+
+func (a *App) RemoveSong(context *gin.Context) {
+	var song songModel
 
 	songID := context.Param("id")
 
-	db.First(&song, songID)
+	a.DB.First(&song, songID)
 
 	if song.ID == 0 {
 		context.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No song found!"})
 		return
 	}
 
-	db.Delete(&song)
+	a.DB.Delete(&song)
 
 	context.JSON(http.StatusNoContent, gin.H{"status": http.StatusNoContent, "message": "Successfully deleted!"})
 
