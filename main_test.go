@@ -29,24 +29,22 @@ func TestAddSong(t *testing.T) {
 
   stringifiedBody := strings.NewReader(testBody)
 
-  //if I hadn't written this as a string already, I'd have had to use the .Encode method
   router := app.MakeRouter()
 
   req, err := http.NewRequest("POST", "/api/v1/songs/", stringifiedBody)
+
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Our API expects a form body, so set the content-type header to make sure it's treated as one.
+
 	req.Header.Add("Content-Type", "application/json")
 
 	res := httptest.NewRecorder()
 
 	router.ServeHTTP(res, req)
 
-  // assert.Equal(t, http.StatusOK, rr.Code)
-  //use with testify
   if res.Code != http.StatusCreated {
-    t.Errorf("ouchie")
+    t.Errorf("ouch!")
   }
 
   tearDown(app)
@@ -59,22 +57,18 @@ func TestAddSongMissingString(t *testing.T) {
 
   stringifiedBody := strings.NewReader(testBody)
 
-  //if I hadn't written this as a string already, I'd have had to use the .Encode method
   router := app.MakeRouter()
 
   req, err := http.NewRequest("POST", "/api/v1/songs/", stringifiedBody)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Our API expects a form body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json")
 
 	res := httptest.NewRecorder()
 
 	router.ServeHTTP(res, req)
 
-  // assert.Equal(t, http.StatusOK, rr.Code)
-  //use with testify
   if res.Code != http.StatusUnprocessableEntity {
     t.Errorf("ouchie")
   }
@@ -89,22 +83,18 @@ func TestAddSongMissingFloat(t *testing.T) {
 
   stringifiedBody := strings.NewReader(testBody)
 
-  //if I hadn't written this as a string already, I'd have had to use the .Encode method
   router := app.MakeRouter()
 
   req, err := http.NewRequest("POST", "/api/v1/songs/", stringifiedBody)
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Our API expects a form body, so set the content-type header to make sure it's treated as one.
 	req.Header.Add("Content-Type", "application/json")
 
 	res := httptest.NewRecorder()
 
 	router.ServeHTTP(res, req)
 
-  // assert.Equal(t, http.StatusOK, rr.Code)
-  //use with testify
   if res.Code != http.StatusUnprocessableEntity {
     t.Errorf("ouchie")
   }
@@ -180,8 +170,6 @@ func TestFetchSong(t *testing.T) {
     var firstSong songModel
 
     app.DB.First(&firstSong)
-    // testParam := "1"
-    // stringifiedParam := strings.NewReader(testParam)
 
     router := app.MakeRouter()
     req, err := http.NewRequest("GET", fmt.Sprintf("/api/v1/songs/%d",
@@ -212,9 +200,6 @@ func TestFetchSongNoSong(t *testing.T) {
     for _, song := range testSongs {
       app.DB.Save(&song)
   	}
-
-    // testParam := "1"
-    // stringifiedParam := strings.NewReader(testParam)
 
     router := app.MakeRouter()
     req, err := http.NewRequest("GET", "/api/v1/songs/5000", nil)
@@ -248,8 +233,6 @@ func TestRemoveSong(t *testing.T) {
     var firstSong songModel
 
     app.DB.First(&firstSong)
-    // testParam := "1"
-    // stringifiedParam := strings.NewReader(testParam)
 
     router := app.MakeRouter()
     req, err := http.NewRequest("DELETE", fmt.Sprintf("/api/v1/songs/%d",
@@ -281,12 +264,9 @@ func TestRemoveSongNoSong(t *testing.T) {
       app.DB.Save(&song)
   	}
 
-    // testParam := "1"
-    // stringifiedParam := strings.NewReader(testParam)
-
     router := app.MakeRouter()
     req, err := http.NewRequest("DELETE", "/api/v1/songs/5000", nil)
-    //we expect this to never be a valid ID
+    //we expect 5000 to never be a valid ID
     if err != nil {
       t.Fatal(err)
     }

@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"net/http"
 	"github.com/gin-gonic/gin"
+//This import gin, is like express, it's a library for handling http requests and responses
 	"github.com/jinzhu/gorm"
+	//gorm is an ORM, and object relationship manager.  It is kind of like knex. This builds your database
 	_ "github.com/lib/pq"
+		//this is our import to use postgres
 )
 
 
