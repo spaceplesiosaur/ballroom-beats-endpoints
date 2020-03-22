@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+  "encoding/json"
 )
 
 func setUp() *App {
@@ -25,9 +26,12 @@ func tearDown(app *App) {
 func TestAddSong(t *testing.T) {
   app := setUp()
 
-  testBody :=  "{\"Title\": \"blue\", \"SpotifyId\": \"12345\", \"URL\": \"www.moose.com\", \"Delay\": 2, \"AvBarDuration\": 3, \"Duration\": 123, \"Tempo\": 4, \"TimeSignature\": 8}"
+  testBody := songInput {Title: "blue", SpotifyId: "12345", URL: "blue-song", Delay: 2, AvBarDuration: 3, Duration: 123, Tempo: 4, TimeSignature: 8}
 
-  stringifiedBody := strings.NewReader(testBody)
+  jsonTestBody, err := json.Marshal(testBody)
+  stringTestBody := string(jsonTestBody)
+
+  stringifiedBody := strings.NewReader(stringTestBody)
 
   router := app.MakeRouter()
 
@@ -44,7 +48,10 @@ func TestAddSong(t *testing.T) {
 	router.ServeHTTP(res, req)
 
   if res.Code != http.StatusCreated {
-    t.Errorf("ouch!")
+    preferredStatus := http.StatusCreated
+    actualStatus := res.Code
+    errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+    t.Errorf(errorMessage)
   }
 
   tearDown(app)
@@ -53,9 +60,12 @@ func TestAddSong(t *testing.T) {
 func TestAddSongMissingString(t *testing.T) {
   app := setUp()
 
-  testBody :=  "{\"SpotifyId\": \"12345\", \"URL\": \"www.moose.com\", \"Delay\": 2, \"AvBarDuration\": 3, \"Duration\": 123, \"Tempo\": 4, \"TimeSignature\": 8}"
+  testBody := songInput {SpotifyId: "12345", URL: "blue-song", Delay: 2, AvBarDuration: 3, Duration: 123, Tempo: 4, TimeSignature: 8}
 
-  stringifiedBody := strings.NewReader(testBody)
+  jsonTestBody, err := json.Marshal(testBody)
+  stringTestBody := string(jsonTestBody)
+
+  stringifiedBody := strings.NewReader(stringTestBody)
 
   router := app.MakeRouter()
 
@@ -70,7 +80,10 @@ func TestAddSongMissingString(t *testing.T) {
 	router.ServeHTTP(res, req)
 
   if res.Code != http.StatusUnprocessableEntity {
-    t.Errorf("ouchie")
+    preferredStatus := http.StatusUnprocessableEntity
+    actualStatus := res.Code
+    errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+    t.Errorf(errorMessage)
   }
 
   tearDown(app)
@@ -79,9 +92,12 @@ func TestAddSongMissingString(t *testing.T) {
 func TestAddSongMissingFloat(t *testing.T) {
   app := setUp()
 
-  testBody :=  "{\"Title\": \"blue\", \"SpotifyId\": \"12345\", \"URL\": \"www.moose.com\", \"Delay\": 2, \"AvBarDuration\": 3, \"Tempo\": 4, \"TimeSignature\": 8}"
+  testBody := songInput {Title: "blue", SpotifyId: "12345", URL: "blue-song", Delay: 2, AvBarDuration: 3, Tempo: 4, TimeSignature: 8}
 
-  stringifiedBody := strings.NewReader(testBody)
+  jsonTestBody, err := json.Marshal(testBody)
+  stringTestBody := string(jsonTestBody)
+
+  stringifiedBody := strings.NewReader(stringTestBody)
 
   router := app.MakeRouter()
 
@@ -96,7 +112,10 @@ func TestAddSongMissingFloat(t *testing.T) {
 	router.ServeHTTP(res, req)
 
   if res.Code != http.StatusUnprocessableEntity {
-    t.Errorf("ouchie")
+    preferredStatus := http.StatusUnprocessableEntity
+    actualStatus := res.Code
+    errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+    t.Errorf(errorMessage)
   }
 
   tearDown(app)
@@ -125,7 +144,10 @@ func TestFetchAllSongs(t *testing.T) {
   	router.ServeHTTP(res, req)
 
     if res.Code != http.StatusOK {
-      t.Errorf("ouchie")
+      preferredStatus := http.StatusOK
+      actualStatus := res.Code
+      errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+      t.Errorf(errorMessage)
     }
 
     tearDown(app)
@@ -144,9 +166,11 @@ func TestFetchAllSongsNoSongs (t *testing.T) {
 
 	router.ServeHTTP(res, req)
 
-  if res.Code != http.StatusNotFound{
-
-    t.Errorf("ouchie")
+  if res.Code != http.StatusNotFound {
+    preferredStatus := http.StatusNotFound
+    actualStatus := res.Code
+    errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+    t.Errorf(errorMessage)
   }
 
   tearDown(app)
@@ -183,7 +207,10 @@ func TestFetchSong(t *testing.T) {
   	router.ServeHTTP(res, req)
 
     if res.Code != http.StatusOK {
-      t.Errorf("ouchie")
+      preferredStatus := http.StatusOK
+      actualStatus := res.Code
+      errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+      t.Errorf(errorMessage)
     }
 
     tearDown(app)
@@ -212,7 +239,10 @@ func TestFetchSongNoSong(t *testing.T) {
   	router.ServeHTTP(res, req)
 
     if res.Code != http.StatusNotFound {
-      t.Errorf("ouchie")
+      preferredStatus := http.StatusNotFound
+      actualStatus := res.Code
+      errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+      t.Errorf(errorMessage)
     }
 
     tearDown(app)
@@ -246,7 +276,10 @@ func TestRemoveSong(t *testing.T) {
   	router.ServeHTTP(res, req)
 
     if res.Code != http.StatusNoContent {
-      t.Errorf("ouchie")
+      preferredStatus := http.StatusNoContent
+      actualStatus := res.Code
+      errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+      t.Errorf(errorMessage)
     }
 
     tearDown(app)
@@ -276,7 +309,10 @@ func TestRemoveSongNoSong(t *testing.T) {
   	router.ServeHTTP(res, req)
 
     if res.Code != http.StatusNotFound {
-      t.Errorf("ouchie")
+      preferredStatus := http.StatusNotFound
+      actualStatus := res.Code
+      errorMessage := fmt.Sprintf("Summary of failure: Expected %d, got %d", preferredStatus, actualStatus)
+      t.Errorf(errorMessage)
     }
 
     tearDown(app)
